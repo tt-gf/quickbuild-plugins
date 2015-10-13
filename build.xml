@@ -1,0 +1,156 @@
+<project name="plugins" default="package" basedir=".">
+	<property environment="env"/>
+	
+	<fail message="Environment variable QUICKBUILD_HOME need to be defined to point to QuickBuild installation directory." 
+		unless="env.QUICKBUILD_HOME"/>	
+
+	<available file="${env.QUICKBUILD_HOME}/framework" property="quickbuildHome.correct"/>
+	<fail message="Please make sure environment variable QUICKBUILD_HOME is pointing to the correct QuickBuild installation directory (the directory containing sub folders such as &quot;bin&quot;, &quot;conf&quot;, &quot;framework&quot;, etc)." unless="quickbuildHome.correct"/>
+
+	<target name="package">
+		<mkdir dir="stage"/>
+		
+		<unzip dest="stage/jars">
+			<fileset dir="${env.QUICKBUILD_HOME}/plugins" includes="*.jar"/>
+			<patternset>
+				<include name="**/*.jar"/>
+			</patternset>
+		</unzip>
+		
+		<taskdef name="groovy" classname="org.codehaus.groovy.ant.Groovy">
+			<classpath>
+				<fileset dir="stage/jars" includes="**/groovy*.jar"/>
+			</classpath>
+		</taskdef>
+		
+		<groovy>
+			def pluginDependencies = new HashMap()
+			def pluginDirs = new HashMap()
+			def pluginVersions = new HashMap()
+			for (each in new File(properties["basedir"]).listFiles()) {
+				def manifestFile = new File(each, "META-INF/MANIFEST.MF")
+				if (manifestFile.exists()) {
+					def attrs
+					manifestFile.withInputStream {
+						stream -> attrs = new java.util.jar.Manifest(stream).getMainAttributes()
+					}
+					def pluginId = attrs.getValue("Bundle-SymbolicName")
+					if (pluginId != null)
+					if (pluginId.trim().length() != 0) {
+						def pos = pluginId.indexOf(';')
+						if (pos != -1)
+							pluginId = pluginId.substring(0, pos)
+						pluginDirs.put(pluginId, each)
+						pluginVersions.put(pluginId, attrs.getValue("Bundle-Version"))
+						def dependencies = new HashSet()
+						if (new File(each, "build.properties").exists()) {
+							String required = attrs.getValue("Require-Bundle")
+							if (required != null) {
+								for (partial in required.split(",")) {
+									partial = partial.trim()
+									if (partial.length() == 0)
+										continue;
+									pos = partial.indexOf(';')
+									if (pos != -1)
+										partial = partial.substring(0, pos).trim()
+									dependencies.add(partial);		
+								}
+							}
+						}
+						pluginDependencies.put(pluginId, dependencies)
+					}
+				}
+			}
+			for (pluginId in pluginDependencies.keySet()) {
+				def nonExistants = new ArrayList()
+				for (dependency in pluginDependencies.get(pluginId)) {
+					if (!pluginDependencies.containsKey(dependency))
+						nonExistants.add(dependency)
+				}
+				pluginDependencies.get(pluginId).removeAll(nonExistants)
+			}
+			
+			def sortedPlugins = new ArrayList()
+			
+			def dependencyIds = new HashMap()
+			for (entry in pluginDependencies.entrySet()) 
+				dependencyIds.put(entry.getKey(), new HashSet(entry.getValue()))
+
+			while (!dependencyIds.isEmpty()) {
+				Set leafs = new HashSet()
+				for (key in dependencyIds.keySet()) {
+					if (dependencyIds.get(key).isEmpty()) {
+						leafs.add(key)
+						sortedPlugins.add(key)
+					}
+				}
+				if (leafs.isEmpty()) {
+					Set unprocessed = new HashSet()
+					for (id in dependencyIds.keySet())
+						unprocessed.add(id);
+					throw new RuntimeException("Unable to process dependencies: " + unprocessed 
+							+ ". This is either because circular exists in these dependencies, or because " 
+							+ "some of these dependencies depends on non-existent dependencies.")
+				}
+				for (key in leafs) 
+					dependencyIds.remove(key)
+				for (value in dependencyIds.values())
+					value.removeAll(leafs)
+			}		
+			
+			for (pluginId in sortedPlugins) {
+				properties["pluginDir"] = pluginDirs.get(pluginId).name
+				if (new File(pluginDirs.get(pluginId), "build.properties").exists()) {			
+					ant.project.executeTarget("stage.plugin")
+					if (new File(pluginDirs.get(pluginId), "src").exists()) 
+						ant.project.executeTarget("compile.plugin")
+					properties["pluginId"] = pluginId
+					properties["pluginVersion"] = pluginVersions.get(pluginId)
+					ant.project.executeTarget("jar.plugin")
+				}
+			}
+		</groovy>
+	</target>
+
+	<target name="stage.plugin">
+		<mkdir dir="stage/plugins/${pluginDir}"/>
+		<copy todir="stage/plugins/${pluginDir}">
+			<fileset dir="${pluginDir}" excludes=".project, .classpath, build.properties, .settings/**, 
+				src/**, bin/**, test/**, test-src/**, test-out/**, testout/**, testbin/**, test-bin/**, 
+				test-result/**, **/*.java, **/*.class"/> 
+		</copy>
+		<copy todir="stage/jars" flatten="true">
+			<fileset dir="stage/plugins/${pluginDir}" includes="**/*.jar"/>
+		</copy>
+	</target>
+	
+	<target name="compile.plugin">
+        <javac destdir="stage/plugins/${pluginDir}" debug="on" source="1.6" target="1.6" includeAntRuntime="false">
+            <src path="${pluginDir}/src"/>
+            <classpath>
+            	<fileset dir="stage/jars" includes="**/*.jar"/>
+            	<fileset dir="${env.QUICKBUILD_HOME}/plugins" includes="**/*.jar"/>
+            	<pathelement location="stage/classes"/>
+            	<pathelement location="${env.QUICKBUILD_HOME}/plugins/com.pmease.quickbuild.bootstrap"/>
+            </classpath>
+        </javac>		
+		<copy todir="stage/plugins/${pluginDir}">
+			<fileset dir="${pluginDir}/src" excludes="**/*.java"/>
+		</copy>
+		<copy todir="stage/classes">
+			<fileset dir="stage/plugins/${pluginDir}" includes="**/*.class"/>
+		</copy>
+	</target>
+	
+	<target name="jar.plugin">
+        <jar destfile="stage/plugins/${pluginId}_${pluginVersion}.jar" manifest="stage/plugins/${pluginDir}/META-INF/MANIFEST.MF">
+        	<fileset dir="stage/plugins/${pluginDir}"/>
+        </jar>
+		<delete dir="stage/plugins/${pluginDir}"/>
+	</target>
+	
+	<target name="clean">
+		<delete dir="stage"/>
+	</target>
+
+</project>

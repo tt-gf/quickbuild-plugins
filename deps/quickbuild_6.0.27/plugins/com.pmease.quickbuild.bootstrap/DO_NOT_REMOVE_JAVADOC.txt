@@ -1,0 +1,2 @@
+Do not remove the file "javadoc.zip" since it will be auto-associated with QuickBuild framework 
+projects when you set up the plugin development workspace.
