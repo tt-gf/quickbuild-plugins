@@ -39,7 +39,7 @@ public class InfluxDbStep extends Step {
         database = value;
     }
 
-    @Editable(name="Data", description="Database in which data will be stored.")
+    @Editable(name="Data", description="Data in line protocol format that will be stored.")
     @NotEmpty
     @Scriptable
     public String getData() {
