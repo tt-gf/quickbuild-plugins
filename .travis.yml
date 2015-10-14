@@ -1,0 +1,6 @@
+env:
+  - QUICKBUILD_HOME=${TRAVIS_BUILD_DIR}/deps/quickbuild_6.0.27
+script:
+  - ant clean
+  - ant
+
