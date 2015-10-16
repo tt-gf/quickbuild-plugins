@@ -64,3 +64,9 @@ Copy the generated plugin jar file into the plugins directory of the Quickbuild 
 ```
 $ cp stage/plugins/com.tomtom.quickbuild.plugin.influxdb_0.0.1.jar <location_of_production_server>/plugins/.
 ```
+
+
+# How to create a step and store data in InfluxDB?
+The following example shows you how to store artifact sizes provided by the `du` command into an InfluxDB database.
+![General settings](quickbuild-plugin-influxdb-example-step1.png)
+![Advanced settings](quickbuild-plugin-influxdb-example-step2.png)
