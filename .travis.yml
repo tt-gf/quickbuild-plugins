@@ -16,7 +16,5 @@ addons:
     build_command:   "ant"
     branch_pattern: coverity_scan
 
-script:
-  - ant clean
-  - ant
+script: if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then ant clean && ant ; fi
 
