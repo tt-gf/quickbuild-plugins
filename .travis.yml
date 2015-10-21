@@ -1,6 +1,20 @@
+language: java
+
 env:
+  global:
+  # The next declaration is the encrypted COVERITY_SCAN_TOKEN, created
+  #   via the "travis encrypt" command using the project repo's public key
+  - secure: "FFaP6Fo+K5rnRbrDczypnaMdrUI1D04xZrIkGFHxvWHzwB9jn8aIT2cVaU5d/z1WWpfKD5ktphuRemH9+k+P+UPiG4XIpNrQDtHdhNJsB2XbG03ZqKLjBkhTiToq2AJTRhhOKc5GmVItpau/DPQ595UogW0sPJcG84xmL9CgKjfENk+Oh0RGF77qRYlIOtQm+kfjp+YCmasoWdzCb//C0eOC38h0l6iu/wDukmirSrAULSkW/AZNsHkD8ScyiLSYtAhH+1wIWm1vOJ84yoVIj8ZpZpubtZp77vESX6r0pcRndgzuLQKgCNRMwWoDO8gsm+jWlC8BEshH07mdD62gZKBAd3/rkBQcWaShZv01T0eq1lkQFJKW0b/fOLcwF/zeMnP4CYBl0nFnNr3htWkqE0UUUGLrWtzm7JLQh0WcGArUsnzXcbM4g8jiTs/OZa6PXm9boTUUjMLz4bVKdSKJd6DTrgGazRzglWopoOpkUkl/YSOAJ+wonKRRlF17kP1swnN9br4+ZnS4HUihE4x5ntGufDMB31Bkqk2ZEGz4pUSBFk3OTbhnuwC7eIZeZ7juzjtcWX4HzSkyihx72XDtN9kt8N6oO9dNC1FVcWRFzTSMcf80xtO0413Zm+2RJvuNvhaojMsS2vNvM7mMNVPR7tZ6/lTVgjeYTyKq/V9zY6g="
   - QUICKBUILD_HOME=${TRAVIS_BUILD_DIR}/deps/quickbuild_6.0.27
-script:
-  - ant clean
-  - ant
+
+addons:
+  coverity_scan:
+    project:
+      name: "tt-gf/quickbuild-plugins"
+    notification_email: sowasdummes@gmail.com
+    build_command_prepend: "ant clean"
+    build_command:   "ant"
+    branch_pattern: coverity_scan
+
+script: if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then ant clean && ant ; fi
 
