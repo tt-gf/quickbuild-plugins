@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>com.tomtom.quickbuild.plugin.influxdb</name>
+	<name>com.tt.quickbuild.plugin.influxdb</name>
 	<comment></comment>
 	<projects>
 	</projects>

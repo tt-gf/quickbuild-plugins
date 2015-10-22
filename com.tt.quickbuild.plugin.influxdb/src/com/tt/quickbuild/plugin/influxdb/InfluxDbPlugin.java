@@ -1,4 +1,4 @@
-package com.tomtom.quickbuild.plugin.influxdb;
+package com.tt.quickbuild.plugin.influxdb;
 
 import com.pmease.quickbuild.extensionpoint.StepProvider;
 import com.pmease.quickbuild.pluginsupport.AbstractPlugin;

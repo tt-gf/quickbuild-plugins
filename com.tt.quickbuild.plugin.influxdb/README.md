@@ -15,7 +15,7 @@ In order to make modifications and test them on a local Quickbuild instance you 
 * Once you have the four Quickbuild projects (`com.pmease.quickbuild`, `com.pmease.quickbuild.bootstrap`, `com.pmease.quickbuild.equinoxadapter` and `com.pmease.quickbuild.plugin.report.engine`) in your Eclipse imported you have to import the InfluxDB plugin project
 * Right-click in 'Package Explorer' and select 'Import...'
 * Select 'Existing Projects into Workspace', select path to the root directory of this project and click on 'Finish'
-* Now you should see in total five projects (+`com.tomtom.quickbuild.plugin.influxdb`)
+* Now you should see in total five projects (+`com.tt.quickbuild.plugin.influxdb`)
 * **In order to load the InfluxDB plugin when starting the local Quickbuild instance via Eclipse we have to create a symbolic link(s) to the quickbuild-plugins repository plugin project(s).**
 
 	```
@@ -27,7 +27,7 @@ In order to make modifications and test them on a local Quickbuild instance you 
 	com.pmease.quickbuild.equinoxadapter
 	com.pmease.quickbuild.bootstrap
 
-	com.tomtom.quickbuild.plugin.influxdb -> quickbuild-plugins/com.tomtom.quickbuild.plugin.influxdb
+	com.tt.quickbuild.plugin.influxdb -> quickbuild-plugins/com.tt.quickbuild.plugin.influxdb
 
 	quickbuild-plugins
     ```
@@ -62,7 +62,7 @@ $ ant clean
 Copy the generated plugin jar file into the plugins directory of the Quickbuild server installation.
 
 ```
-$ cp stage/plugins/com.tomtom.quickbuild.plugin.influxdb_0.0.1.jar <location_of_production_server>/plugins/.
+$ cp stage/plugins/com.tt.quickbuild.plugin.influxdb_0.0.1.jar <location_of_production_server>/plugins/.
 ```
 
 

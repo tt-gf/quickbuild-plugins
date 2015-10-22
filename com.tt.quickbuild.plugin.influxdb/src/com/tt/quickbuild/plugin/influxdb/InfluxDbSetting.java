@@ -1,4 +1,4 @@
-package com.tomtom.quickbuild.plugin.influxdb;
+package com.tt.quickbuild.plugin.influxdb;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
